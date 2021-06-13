@@ -27,23 +27,29 @@ def make_histogram (data, title, filename, target, feature):
 
     #plt.savefig(filename)
     
-def make_barchart(data, target, selection = None):
+def make_barchart(data, target, selection = None, features = ["h1","h2","h3"], feature_col="hypothesis", sort_by=None, color_by=None):
     if selection:
         for key, value in selection.items():
             data = data[(data[key]==value)]
-    features = ["h1","h2","h3"]
     values = []
+   
     for feature in features: 
-        normalized_target_value = data [data["hypothesis"]==feature][target].sum()/data [data["hypothesis"]==feature]["Impressions"].sum()
+        normalized_target_value = data [data[feature_col]==feature][target].sum()/data [data[feature_col]==feature]["Impressions"].sum()
         values.append(normalized_target_value)
+    #pdb.set_trace()
+    #sort values and features
+    if sort_by == "target": 
+        indices = np.argsort(values)
+        features = [features[i] for i in indices]
+        values = [values[i] for i in indices]
     plt.bar(features, values)
     plt.title(target)
     plt.ylabel(target + " per impressions")
 
-def get_normalized_values(data,target, features = ["h1","h2","h3"]):
+def get_normalized_values(data,target, features = ["h1","h2","h3"], feature_col="hypothesis"):
     values = []
     for feature in features: 
-        normalized_target_value = data [data["hypothesis"]==feature][target].sum()/data [data["hypothesis"]==feature]["Impressions"].sum()
+        normalized_target_value = data [data[feature_col]==feature][target].sum()/data [data[feature_col]==feature]["Impressions"].sum()
         values.append(normalized_target_value)
     return values 
 
