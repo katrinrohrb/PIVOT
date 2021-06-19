@@ -5,7 +5,10 @@ import math
 import numpy as np
 
 def get_article_names(data):
-    return set(data["name"])
+    return sorted(set(data["name"]))
+
+def get_values(data,column):
+    return sorted(set(data[column]))
     
 def get_article_targets_for_feature(data, feature, target):
     values = []
@@ -34,7 +37,7 @@ def make_barchart(data, target, selection = None, features = ["h1","h2","h3"], f
     values = []
    
     for feature in features: 
-        normalized_target_value = data [data[feature_col]==feature][target].sum()/data [data[feature_col]==feature]["Impressions"].sum()
+        normalized_target_value = (data [data[feature_col]==feature][target]/data [data[feature_col]==feature]["Impressions"]).sum()
         values.append(normalized_target_value)
     #pdb.set_trace()
     #sort values and features
@@ -49,9 +52,9 @@ def make_barchart(data, target, selection = None, features = ["h1","h2","h3"], f
 def get_normalized_values(data, target, features = ["h1","h2","h3"], feature_col="hypothesis"):
     values = []
     for feature in features: 
-        normalized_target_value = data [data[feature_col]==feature][target].sum()/data [data[feature_col]==feature]["Impressions"].sum()
+        normalized_target_value = (data [data[feature_col]==feature][target]/data [data[feature_col]==feature]["Impressions"]).sum()
         values.append(normalized_target_value)
-    return values 
+    return np.array(values) 
 
 def make_multi_barchart(data, targets, selection, features = ["h1","h2","h3"], title=""):
     for key, value in selection.items():
@@ -64,6 +67,24 @@ def make_multi_barchart(data, targets, selection, features = ["h1","h2","h3"], t
     plt.title(title)
     plt.legend()
     plt.ylabel("video watches per impressions")
+    
+    
+def make_stacked_barchart(data, target, stack_column, feature_column, title=""):
+    features = get_values(data,feature_column)
+    selection_stack = get_values(data,stack_column)
+    previous_values=0
+    for stack_selection in selection_stack:
+        #print(stack_selection)
+        view = data[(data[stack_column]==stack_selection)]
+        values = get_normalized_values(view,target,features,feature_col="name")
+        #print(values)
+        #values = 1
+        plt.bar(features, values, label=stack_selection, bottom = previous_values)
+        previous_values += values
+    plt.title(title)
+    plt.legend()
+    plt.ylabel(target)
+    plt.xticks(rotation=90)
  
 def make_multi_histogram(data, target, features = ["h1","h2","h3"], title=None):
     if not title:
